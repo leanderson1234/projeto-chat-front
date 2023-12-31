@@ -9,7 +9,7 @@ export const auth = async () => {
         clientId: 'Sistema_chat'
       });
      const authenticado = await keycloak.init({
-      onLoad:'login-required'
+      onLoad:'check-sso'
     })
     if(authenticado){
       usuarioAuth().setUsuarioAuth(keycloak.tokenParsed)
@@ -17,14 +17,7 @@ export const auth = async () => {
       return {
         keycloak,
         
-        // init: async () => {
-        //   const authenticado = await keycloak.init({
-        //     onLoad:'login-required'
-        //   })
-        //   if(authenticado){
-        //     usuarioAuth().setUsuarioAuth(keycloak.tokenParsed)
-        //   }
-        // }
+       
      }
 
 }

@@ -4,16 +4,27 @@
   import Chat from "./components/Chat.vue";
   import ConnectionManagerVue from "./components/ConnectionManager.vue";
   import {auth} from './services/keycloak'
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted,nextTick } from 'vue'
 export default {
   setup(){
     const connectionStore = useConnectionStore();
-    // remove any existing listeners (after a hot module replacement)
-    const logout = async () => {
-      // if((await auth()).keycloak.authenticated){
-      //   (await auth()).keycloak.logout()
-      // }
-      (await auth()).keycloak.logout()
+    let authenticated = ref(false)
+    async function logout(){
+      let keycloakInstance = await auth()
+      if(keycloakInstance.keycloak?.authenticated){
+        authenticated.value = !keycloakInstance.keycloak?.authenticated
+        await nextTick()
+        keycloakInstance.keycloak.logout()
+      }
+        }
+
+     async function login(){
+      let keycloakInstance = await auth()
+      if(!keycloakInstance.keycloak?.authenticated){
+         authenticated.value = keycloakInstance.keycloak?.authenticated
+         await nextTick()
+        keycloakInstance.keycloak.login()
+      }
         }
     connectionStore.bindEvents();
 
@@ -26,7 +37,9 @@ export default {
 
 
     return {
-      logout
+      logout,
+      login,
+      authenticated
     }
   }
 }
@@ -35,6 +48,8 @@ export default {
 <div>
   <ConnectionManagerVue />
   <Chat/>
-  <button @click="logout">sair</button>
+  {{authenticated}}
+   <button @click.stop.prevent="login" v-show="!authenticated">entrar</button>
+  <button @click.stop.prevent="logout" v-show="authenticated">sair</button>
 </div>
 </template>
